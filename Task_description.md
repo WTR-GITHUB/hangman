@@ -11,7 +11,8 @@ Create a Hangman Game (terminal version). https://www.youtube.com/watch?v=leW9Zo
 
 !! - Ability to guess the word !!
 
-REQUIREMENTS: 
+REQUIREMENTS:
+
 ● Create a new GITHUB project, virtual env, README, .gitignore, etc.
 
 ● Use python functions and/or classes to achieve necessary functionality.
@@ -34,7 +35,8 @@ Create a Hangman Game (GUI/terminal version). https://www.youtube.com/watch?v=le
 
 - If user has 0 guesses (lifes) left, game is lost. (Give options to see all time results or start new game)
 
-REQUIREMENTS: 
+REQUIREMENTS:
+
 ● Create a new GITHUB project, virtual env, README, .gitignore, etc.
 
 ● Use OOP structures (classes, inheritance, dataclasses, modules) to construct game backend logic.
