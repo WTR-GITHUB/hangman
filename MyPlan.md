@@ -1,9 +1,9 @@
 MINIMUM
 ------------------------------------------------------------------------------
 1. Project setup
-    - Create GitHub
-    - Set Up Virtual Environment
-    - Create a .gitignore
+    + Create GitHub
+    + Set Up Virtual Environment
+    + Create a .gitignore
 
 2. Backend development
     - Define the game logic in code
