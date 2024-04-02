@@ -1,4 +1,4 @@
-Scaled Down Task (maximum score : 7-8):
+**SCALE DOWN TASK (maximum score : 7-8):**
 
 Task:
 Create a Hangman Game (terminal version). https://www.youtube.com/watch?v=leW9ZotUVYo
@@ -23,9 +23,9 @@ REQUIREMENTS:
 
 ● Use `print` or logging library to log out information.
 
+--------------------------------------------------------------------
 
-
-Full task (maximum score 10):
+**FULL TASK (maximum score 10):**
 
 Create a Hangman Game (GUI/terminal version). https://www.youtube.com/watch?v=leW9ZotUVYo
 
@@ -56,7 +56,8 @@ REQUIREMENTS:
 ● Unit tests to cover most important functionality.
 
 ● After the game session, show a table with user information: games played today , games won/lost today, guesses made.
- 
+
+--------------------------------------------------------------------
 Nice to have:
  - All system parts should be dockerized
  - Shell script to run the program automatically
