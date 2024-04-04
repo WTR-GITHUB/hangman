@@ -129,3 +129,5 @@ while True:
     if set(word_game.word) == set(used_letters_list):
         print("Congratulations! You've guessed the word correctly.")
         break
+
+
