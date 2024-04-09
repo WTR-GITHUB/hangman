@@ -1,3 +1,4 @@
 .hang
 **/__pycache__
 .vscode
+credentials.py
