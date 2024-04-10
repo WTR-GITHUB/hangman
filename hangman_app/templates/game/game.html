@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    function startGame() {
+        // Make AJAX request to Flask route
+        fetch('/game/start', {
+            method: 'POST'
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Update revealedWord div with the returned data
+            document.getElementById('revealedWord').innerText = data.revealed_word;
+            
+            // Show alphabet buttons
+            document.getElementById('alphabetButtonsContainer').style.display = 'block';
+        })
+        .catch((error) => {
+            console.error('Error:', error);
+        });
+    }
+
+    function selectLetter(letter) {
+        // Handle letter selection logic here
+        console.log('Selected letter:', letter);
+    }
+
+    function checkLetter(letter) {
+    fetch('/game/check_letter', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 'letter': letter }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Update revealed word
+        document.getElementById('revealedWord').innerText = data.updated_word;
+        
+        // Update used letters (you'll need to format the data appropriately)
+        document.getElementById('usedLetters').innerText = "Used Letters: " + data.used_letters.join(', ');
+        
+        // Check if the guessed letter was correct
+        if (!data.is_correct) {
+            // Handle incorrect guess (e.g., update hangman image)
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+}
+
+</script>
+
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-md-5">
+        <!-- First Row: Buttons -->
+        <div class="row mb-3">
+            <!-- Button Group for Horizontal Alignment to the Left -->
+            <div class="col">
+                <div class="d-flex justify-content-center">
+                    <!-- Start Game Button -->
+                    <button class="btn btn-dark mr-2" type="button" onclick="startGame()">Start Game</button>
+                    <!-- Exit Game Button -->
+                    <button class="btn btn-dark" type="button">Exit Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row: Used Letters -->
+        <div class="row mb-3">
+            <div class="col">
+                <div id="usedLetters" class="text-center"></div>
+            </div>
+        </div>
+
+        <!-- Third Row: Revealed Word -->
+        <div class="row mb-3">
+            <div class="col d-flex justify-content-center align-items-center">
+                <div id="revealedWord" style="font-size: 42px;"></div>
+            </div>
+        </div>
+
+        <!-- Fourth Row: Text ABCDEF -->
+        <div class="row mb-3">
+            <div class="col">
+                <div id="alphabetButtonsContainer" style="display: none;">
+                    <div class="d-flex justify-content-center">
+                        {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+                            <button class="btn btn-secondary mr-2" type="button" onclick="selectLetter('{{ letter }}')">{{ letter }}</button>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Middle Border -->
+    <div class="col-md-auto border-left border-right border-dark">
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-5">
+        <!-- Image with Adjustable Size and Centered Position -->
+        <div class="d-flex justify-content-center mt-3">
+            <img src="/static/game_image/pngegg.png" class="img-fluid" alt="Game Image">
+        </div>
+    </div>
+</div>
+
+{% endblock %}

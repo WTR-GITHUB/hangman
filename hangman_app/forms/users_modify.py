@@ -3,7 +3,7 @@ from wtforms import SubmitField, StringField, PasswordField
 from wtforms.validators import DataRequired, ValidationError, EqualTo, Email
 from flask_wtf.file import FileField, FileAllowed
 from hangman_app import app
-from hangman_app.models.models import User
+from hangman_app.models.sql_models import User
 from flask_login import current_user
 
 class UpdateAccountForm(FlaskForm):

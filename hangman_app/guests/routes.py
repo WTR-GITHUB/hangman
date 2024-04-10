@@ -1,21 +1,15 @@
-import re
 from sqlalchemy.exc import IntegrityError
 import traceback
 from hangman_app import db, bcrypt
 from flask import redirect, render_template, flash, request, url_for
 from flask_login import current_user, login_user
-from hangman_app.models.models import User
+from hangman_app.models.sql_models import User
 from hangman_app.forms.users_forms import SigninForm, LoginForm
 from hangman_app.guests import bp_guests
 from hangman_app.forms.users_modify import (
     InquiriesUpdateForm,
     PasswordUpdateForm,
 )
-
-
-from sqlalchemy.exc import IntegrityError
-
-from sqlalchemy.exc import IntegrityError
 
 @bp_guests.route("/signin", methods=["GET", "POST"])
 def signin_page():
