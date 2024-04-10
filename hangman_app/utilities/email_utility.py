@@ -10,7 +10,7 @@ def send_reset_email(user):
         recipients=[user.email],
     )
     msg.body = f"""Click the link to reset your password:
-    {url_for('reset_token', token=token, _external=True)}
+    {url_for('main.reset_token', token=token, _external=True)}
     If you did not make this request, do nothing and the password will not be changed.
     """
     print(msg)

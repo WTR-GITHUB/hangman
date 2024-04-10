@@ -3,15 +3,17 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_mail import Message, Mail
-from hangman_app.credentials import MAIL_PASSWORD, MAIL_USERNAME
+from hangman_app.credentials import (
+    MAIL_PASSWORD,
+    MAIL_USERNAME,
+    POSTGRES_DB,
+    POSTGRES_PASSWORD,
+    POSTGRES_HOST,
+    POSTGRES_PORT,
+    POSTGRES_USER,
+)
 
 app = Flask(__name__)
-
-POSTGRES_USER = "postgres"
-POSTGRES_PASSWORD = "MyHangman"
-POSTGRES_DB = "postgres"
-POSTGRES_HOST = "localhost"
-POSTGRES_PORT = "5432"
 
 app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
@@ -34,10 +36,12 @@ login_manager.login_view = "signin"
 login_manager.login_message_category = "info"
 
 
-from hangman_app.routes.routes import bp
-from hangman_app.email_utility import send_reset_email
+from hangman_app.guests.routes import bp_guests
+from hangman_app.members.routes import bp_members
+from hangman_app.utilities.email_utility import send_reset_email
 
-app.register_blueprint(bp)
+app.register_blueprint(bp_guests)
+app.register_blueprint(bp_members)
 
 from hangman_app.models.models import User
 
@@ -46,6 +50,25 @@ from hangman_app.models.models import User
 def load_user(user_id):
     db.create_all()
     return User.query.get(int(user_id))
+
+import os
+from modules import MongoDB
+from hangman_app.credentials import HOST, PORT, DB_NAME, COLLECTION_NAME
+from pymongo.errors import ConnectionFailure, PyMongoError, ConfigurationError
+
+try:
+    mongodb = MongoDB(
+        host=HOST,
+        port=int(PORT),
+        db_name=DB_NAME,
+        collection_name=COLLECTION_NAME,
+    )
+except ConnectionFailure as e:
+    print("Connection failure:", str(e))
+except ConfigurationError as e:
+    print("Configuration failure:", str(e))
+except PyMongoError as e:
+    print("General failure:", str(e))
 
 
 if __name__ == "__main__":
