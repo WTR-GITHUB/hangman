@@ -1,6 +1,7 @@
 from hangman_app import db, app
 from itsdangerous import URLSafeTimedSerializer as Serializer
 from flask_login import UserMixin
+from datetime import datetime
 
 class User(db.Model, UserMixin):
     __tablename__ = "users"
@@ -23,3 +24,16 @@ class User(db.Model, UserMixin):
         except:
             return None
         return User.query.get(user_id)
+    
+class GameStats(db.Model):
+    __tablename__ = "game_stats"
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    game_result = db.Column(db.Boolean, nullable=False)
+    total_letters_guessed = db.Column(db.Integer, nullable=False)
+    game_played_timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
+
+    def __repr__(self):
+        return f"GameStats(user_id={self.user_id}, game_result={self.game_result}, " \
+               f"total_letters_guessed={self.total_letters_guessed}, " \
+               f"game_played_timestamp={self.game_played_timestamp})"

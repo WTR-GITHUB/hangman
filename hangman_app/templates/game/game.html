@@ -3,30 +3,94 @@
 {% block content %}
 
 <script>
+    let countupInterval;
+    let timer = 0;
+    let usedLetters = [];
+    let gameInProgress = false;
+
+    function showMessage(message, type = "info", persistent = false) {
+        const messageArea = document.getElementById('messageArea');
+        messageArea.className = `alert alert-${type}`;
+        messageArea.innerText = message;
+        messageArea.style.display = 'block';
+
+        if (!persistent) {
+            // Automatically hide the message after 3 seconds
+            setTimeout(() => {
+                messageArea.style.display = 'none';
+            }, 3000);
+        }
+    }
+
     function startGame() {
-        // Make AJAX request to Flask route
+        timer = 0;
+        document.getElementById('countup').innerText = '0s';  // Reset the timer display
+
+        stopCountup();  // Stop the countup if it's running
+
+        // Reset used letters, text input, and revealed word
+        usedLetters = [];
+        document.getElementById('usedLetters').innerText = "Used Letters: ";
+        document.getElementById('textInput').value = '';  // Clear text input
+        document.getElementById('revealedWord').innerText = '';  // Clear revealed word
+
+        // Enable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+        alphabetButtons.forEach(button => {
+            button.disabled = false;
+            button.style.backgroundColor = '';
+        });
+
         fetch('/game/start', {
             method: 'POST'
         })
-        .then(response => response.json())
-        .then(data => {
-            // Update revealedWord div with the returned data
-            document.getElementById('revealedWord').innerText = data.revealed_word;
-            
-            // Show alphabet buttons
-            document.getElementById('alphabetButtonsContainer').style.display = 'block';
-        })
-        .catch((error) => {
-            console.error('Error:', error);
-        });
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('revealedWord').innerText = data.revealed_word;
+                document.getElementById('alphabetButtonsContainer').style.display = 'block';
+                gameInProgress = true; // Set game in progress
+                startCountup();
+                showMessage("Game started!", "success");
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showMessage("Error starting the game.", "danger");
+            });
+    }
+
+    function startCountup() {
+        countupInterval = setInterval(() => {
+            timer++;
+            document.getElementById('countup').innerText = timer + 's';
+        }, 1000);
+    }
+
+    function stopCountup() {
+        clearInterval(countupInterval);
     }
 
     function selectLetter(letter) {
-        // Handle letter selection logic here
-        console.log('Selected letter:', letter);
+    if (!gameInProgress) return; // If game is over, do nothing
+
+    // Disable button
+    const button = document.getElementById(letter);
+    button.disabled = true;
+    button.style.backgroundColor = 'grey';
+
+    // Add letter to used letters
+    usedLetters.push(letter);
+    document.getElementById('usedLetters').innerText = "Used Letters: " + usedLetters.join(', ');
+
+    // Check if the limit of 10 guesses is reached
+    if (usedLetters.length === 10) {
+        showMessage("You have reached the total 10 guess limit. Guess the word!", "warning");
+        stopCountup();
+        document.getElementById('countup').innerText = 'You have reached the total 10 guess limit. Guess the word!!';
+        endGame(); // End the game
+        return;
     }
 
-    function checkLetter(letter) {
+    // Make AJAX request to check the letter
     fetch('/game/check_letter', {
         method: 'POST',
         headers: {
@@ -34,29 +98,132 @@
         },
         body: JSON.stringify({ 'letter': letter }),
     })
-    .then(response => response.json())
-    .then(data => {
-        // Update revealed word
-        document.getElementById('revealedWord').innerText = data.updated_word;
-        
-        // Update used letters (you'll need to format the data appropriately)
-        document.getElementById('usedLetters').innerText = "Used Letters: " + data.used_letters.join(', ');
-        
-        // Check if the guessed letter was correct
-        if (!data.is_correct) {
-            // Handle incorrect guess (e.g., update hangman image)
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('revealedWord').innerText = data.revealed_word;
+
+            if (!data.is_correct) {
+                showMessage(`The letter '${letter}' is not in the word.`, "danger");
+            } else {
+                showMessage(`The letter '${letter}' is in the word.`, "success");
+            }
+
+            if (data.game_over) {
+                gameOver(); // Call endGame function if game is over
+                showMessage("Game lost", "danger"); // Add game lost message
+                stopCountup(); // Stop the countup timer
+                document.getElementById('countup').innerText = 'Game lost!'; // Update time display
+            }
+            else {
+            // Check if all necessary letters have been guessed
+            if (data.all_letters_guessed) {
+                showMessage("Congratulations! You've guessed all the letters in the word.", "success");
+                stopCountup(); // Stop the countup timer
+                document.getElementById('countup').innerText = 'Game won!';
+                // Optionally, you can end the game here or provide some other feedback
+            }}
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage("Error checking the letter.", "danger");
+        });
 }
+
+    function handleInput(event) {
+        event.preventDefault();  // Prevent default form submission
+
+        const guess = document.getElementById('textInput').value;
+
+        fetch('/game/check_word', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'guess': guess }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.is_correct) {
+                showMessage(`Congratulations! You guessed the word: ${guess}`, "success", true);
+                document.getElementById('countup').innerText = 'Game won!';  // Update the message
+            } else {
+                showMessage(`Sorry, the word '${guess}' is incorrect. Try again.`, "danger");
+                document.getElementById('countup').innerText = 'Game lost!';  // Update the message
+                endGame(); // Call endGame function if game is lost
+            }
+
+            // Stop the countdown timer
+            stopCountup();
+
+            // Reset text input and revealed word display
+            document.getElementById('textInput').value = '';
+            document.getElementById('revealedWord').innerText = '';
+
+            // Show the game result message
+            document.getElementById('countup').style.visibility = 'visible';  // Make the message visible
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showMessage("Error checking the word.", "danger");
+        });
+    }
+
+    function exitGame() {
+    stopCountup();
+    timer = 0;
+    document.getElementById('countup').innerText = 'Game stopped!';
+
+    showMessage("Game stopped!", "warning");
+
+    // Reset used letters and text input
+    usedLetters = [];
+    document.getElementById('usedLetters').innerText = "Used Letters: ";
+    document.getElementById('textInput').value = ''; // Clear text input
+
+    // Hide the alphabet buttons
+    document.getElementById('alphabetButtonsContainer').style.display = 'none';
+
+    // End the game
+    gameOver();
+}
+
+    function endGame() {
+        gameInProgress = false; // Set game over
+        
+        // Disable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+        alphabetButtons.forEach(button => {
+            button.disabled = true;
+        });
+    }
+
+    function gameOver() {
+    gameInProgress = false; // Set game over
+
+    // Disable all letter buttons
+    const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+    alphabetButtons.forEach(button => {
+        button.disabled = true;
+    });
+
+    // Disable text input
+    document.getElementById('textInput').disabled = true;
+
+    // Disable the OK button
+    document.querySelector('form button[type="submit"]').disabled = true;
+
+    // Show appropriate message
+    showMessage("Game over. You've reached the limit of wrong guesses or guesses.", "danger");
+}
+
 
 </script>
 
+
+
 <div class="row">
     <!-- Left Column -->
-    <div class="col-md-5">
+    <div class="col-md-6">
         <!-- First Row: Buttons -->
         <div class="row mb-3">
             <!-- Button Group for Horizontal Alignment to the Left -->
@@ -65,48 +232,74 @@
                     <!-- Start Game Button -->
                     <button class="btn btn-dark mr-2" type="button" onclick="startGame()">Start Game</button>
                     <!-- Exit Game Button -->
-                    <button class="btn btn-dark" type="button">Exit Game</button>
+                    <button class="btn btn-dark" type="button" onclick="exitGame()">Exit Game</button>
                 </div>
             </div>
         </div>
 
-        <!-- Second Row: Used Letters -->
+        <!-- Second Row: Time Countup -->
+        <div class="row mb-3">
+            <div class="col d-flex justify-content-center">
+                <div id="countup" style="font-size: 42px;">0s</div>
+            </div>
+        </div>
+
+        <!-- Third Row: Used Letters -->
         <div class="row mb-3">
             <div class="col">
                 <div id="usedLetters" class="text-center"></div>
             </div>
         </div>
 
-        <!-- Third Row: Revealed Word -->
+        <!-- Fourth Row: Revealed Word -->
         <div class="row mb-3">
             <div class="col d-flex justify-content-center align-items-center">
                 <div id="revealedWord" style="font-size: 42px;"></div>
             </div>
         </div>
-
-        <!-- Fourth Row: Text ABCDEF -->
         <div class="row mb-3">
-            <div class="col">
-                <div id="alphabetButtonsContainer" style="display: none;">
-                    <div class="d-flex justify-content-center">
-                        {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
-                            <button class="btn btn-secondary mr-2" type="button" onclick="selectLetter('{{ letter }}')">{{ letter }}</button>
-                        {% endfor %}
+            <div class="col d-flex justify-content-center align-items-center">
+                <form onsubmit="handleInput(event)" class="w-100"> <!-- Add the form element and onsubmit handler, and set width to 100% -->
+                    <div class="d-flex flex-column align-items-center"> <!-- Use flexbox to align items vertically -->
+                        <div class="mb-2 w-100"> <!-- Set the width to 100% for the input -->
+                            <input type="text" id="textInput" class="form-control" placeholder="Guess the word">
+                        </div>
+                        <div class="mb-2"> <!-- Separate button in a new row -->
+                            <button class="btn btn-dark" type="submit">Ok</button> <!-- Use 'submit' type here -->
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
+
     </div>
 
-    <!-- Middle Border -->
-    <div class="col-md-auto border-left border-right border-dark">
-    </div>
 
     <!-- Right Column -->
-    <div class="col-md-5">
+    <div class="col-md-6">
         <!-- Image with Adjustable Size and Centered Position -->
         <div class="d-flex justify-content-center mt-3">
             <img src="/static/game_image/pngegg.png" class="img-fluid" alt="Game Image">
+        </div>
+    </div>
+</div>
+
+<!-- Message Row -->
+<div class="row mb-3" style="height: 50px;">
+    <div class="col">
+        <div id="messageArea" class="alert" role="alert" style="display: none;">
+        </div>
+    </div>
+</div>
+
+<!-- Single Column for Letter Buttons -->
+<div class="row mt-4">
+    <div class="col d-flex justify-content-center">
+        <div id="alphabetButtonsContainer" class="d-flex flex-wrap justify-content-center">
+            {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+            <button id="{{ letter }}" class="btn btn-secondary mx-2 mb-2" type="button"
+                onclick="selectLetter('{{ letter }}')">{{ letter }}</button>
+            {% endfor %}
         </div>
     </div>
 </div>

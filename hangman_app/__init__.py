@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, session
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -25,6 +25,7 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
     f"postgresql+psycopg2://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+app.secret_key = "4654f5dfadsrfasdr54e6rae"
 app.config["SECRET_KEY"] = "4654f5dfadsrfasdr54e6rae"
 app.config["MAIL_SERVER"] = "smtp.gmail.com"
 app.config["MAIL_PORT"] = 587
