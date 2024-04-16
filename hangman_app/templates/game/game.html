@@ -197,7 +197,17 @@
     document.getElementById('alphabetButtonsContainer').style.display = 'none';
 
     // End the game
-    gameOver();
+        // Disable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+    alphabetButtons.forEach(button => {
+        button.disabled = true;
+    });
+
+    // Disable text input
+    document.getElementById('textInput').disabled = true;
+
+    // Disable the OK button
+    document.querySelector('form button[type="submit"]').disabled = true;
     console.log("exitGame function called");
 }
 
@@ -315,7 +325,7 @@ function gameOver() {
                     <!-- Start Game Button -->
                     <button class="btn btn-dark mr-2" type="button" onclick="startGame()">Start Game</button>
                     <!-- Exit Game Button -->
-                    <button class="btn btn-dark" type="button" onclick="exitGame()">Exit Game</button>
+                    <button class="btn btn-dark" type="button" onclick="exitGame()">Stop Game</button>
                 </div>
             </div>
         </div>

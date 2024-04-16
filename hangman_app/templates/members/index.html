@@ -2,31 +2,43 @@
 
 {% block content %}
 
-<h1>Hi</h1>
+<div class="container">
+  <h1 class="mt-4 mb-4">Today's game results:</h1>
 
-{% if all_games %}
-<table>
-  <thead>
-    <tr>
-      <th>Game Result</th>
-      <th>Total Letters Guessed</th>
-      <th>Game Start</th>
-      <th>Game End</th>
-    </tr>
-  </thead>
-  <tbody>
+  {% if all_games %}
+    <div class="row mb-2 font-weight-bold">
+      <div class="col-sm">
+        Date played
+      </div>
+      <div class="col-sm">
+        Game
+      </div>
+      <div class="col-sm">
+        Total letters guessed
+      </div>
+      <div class="col-sm">
+        Duration (seconds)
+      </div>
+    </div>
     {% for game in all_games %}
-    <tr>
-      <td>{{ game.game_result }}</td>
-      <td>{{ game.total_letters_guessed }}</td>
-      <td>{{ game.game_start }}</td>
-      <td>{{ game.game_end }}</td>
-    </tr>
+      <div class="row mb-1">
+        <div class="col-sm">
+          {{ game.game_start.strftime('%Y-%m-%d %H:%M') }}
+        </div>
+        <div class="col-sm" style="color: {% if game.game_result %}green{% else %}red{% endif %};">
+          {{ "WIN" if game.game_result else "LOST" }}
+        </div>
+        <div class="col-sm">
+          {{ game.total_letters_guessed }}
+        </div>
+        <div class="col-sm">
+          {{ game.duration }}
+        </div>
+      </div>
     {% endfor %}
-  </tbody>
-</table>
-{% else %}
-<p>No game statistics available.</p>
-{% endif %}
+  {% else %}
+    <p>No game statistics available.</p>
+  {% endif %}
+</div>
 
 {% endblock %}

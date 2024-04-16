@@ -1,3 +1,5 @@
+from datetime import datetime
+from math import ceil
 import os
 import secrets
 from PIL import Image
@@ -17,17 +19,21 @@ def logout_page():
     return redirect(url_for("guests.index"))
 
 
-
-@bp_members.route("/")
+@bp_members.route("/member")
 def index():
     if not current_user.is_authenticated:
-        current_app.logger.debug(f"User not logged.")
+        current_app.logger.debug("User not logged.")
         return redirect(url_for("guests.index"))
     else:
-        print("Aha cia")
         current_app.logger.debug(f"Current user ID: {current_user.id}")
+        today = datetime.now().date()
         all_stats = GameStats()
-        all_games = all_stats.query.all()
+        all_games = all_stats.query.filter(
+            db.func.date(GameStats.game_start) == today
+        ).all()
+        for game in all_games:
+            duration_seconds = (game.game_end - game.game_start).total_seconds()
+            game.duration = ceil(duration_seconds * 10) / 10
         current_app.logger.debug(all_games)
         return render_template("members/index.html", all_games=all_games)
         
