@@ -2,13 +2,13 @@ import os
 import secrets
 from PIL import Image
 from hangman_app import db, app
-from flask import redirect, render_template, flash, request, url_for
+from flask import current_app, redirect, render_template, flash, request, url_for
 from flask_login import current_user, login_required, logout_user
 from hangman_app.forms.users_modify import (
     UpdateAccountForm,
 )
+from hangman_app.models.sql_models import GameStats
 from hangman_app.members import bp_members
-from hangman_app.guests import bp_guests
 
 
 @bp_members.route("/logout")
@@ -17,12 +17,20 @@ def logout_page():
     return redirect(url_for("guests.index"))
 
 
+
 @bp_members.route("/")
 def index():
     if not current_user.is_authenticated:
+        current_app.logger.debug(f"User not logged.")
         return redirect(url_for("guests.index"))
     else:
-        return render_template("members/index.html")
+        print("Aha cia")
+        current_app.logger.debug(f"Current user ID: {current_user.id}")
+        all_stats = GameStats()
+        all_games = all_stats.query.all()
+        current_app.logger.debug(all_games)
+        return render_template("members/index.html", all_games=all_games)
+        
 
 
 def save_picture(form_picture):
@@ -35,7 +43,7 @@ def save_picture(form_picture):
     i = Image.open(form_picture)
     i.thumbnail(output_size)
     i.save(picture_path)
-    return picture_fn  # Return the filename instead of the Image object
+    return picture_fn
 
 
 @bp_members.route("/account", methods=["GET", "POST"])
@@ -46,7 +54,7 @@ def account():
         if form.image.data:
             image_filename = save_picture(form.image.data)
             current_user.image = (
-                image_filename  # Assign the filename to current_user.image
+                image_filename 
             )
 
         current_user.user_name = form.user_name.data
@@ -61,3 +69,4 @@ def account():
 
     image = url_for("static", filename=("profile_foto/" + str(current_user.image)))
     return render_template("members/account.html", title="Account", form=form, image=image)
+

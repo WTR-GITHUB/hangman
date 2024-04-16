@@ -7,7 +7,6 @@ class Word:
     def random_word(self) -> str:
         random_word_document = mongodb.collection.aggregate([{"$sample": {"size": 1}}])
         random_word = random_word_document.next()["word"]
-        print(random_word)
         return random_word
 
     def display_word(self, used_letters: list) -> str:
@@ -32,7 +31,6 @@ class Word:
             
     def check_all_guessed_letters(self, revealed_letters: list[str]) -> bool:
         unique_word_letters = set(self.word.lower())
-        print(unique_word_letters)  
         for letter in unique_word_letters:
             if letter not in revealed_letters:
                 return False

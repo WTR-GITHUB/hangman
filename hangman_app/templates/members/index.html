@@ -4,4 +4,29 @@
 
 <h1>Hi</h1>
 
+{% if all_games %}
+<table>
+  <thead>
+    <tr>
+      <th>Game Result</th>
+      <th>Total Letters Guessed</th>
+      <th>Game Start</th>
+      <th>Game End</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for game in all_games %}
+    <tr>
+      <td>{{ game.game_result }}</td>
+      <td>{{ game.total_letters_guessed }}</td>
+      <td>{{ game.game_start }}</td>
+      <td>{{ game.game_end }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p>No game statistics available.</p>
+{% endif %}
+
 {% endblock %}

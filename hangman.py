@@ -1,3 +1,28 @@
+import logging
+from logging.handlers import RotatingFileHandler
+from hangman_app import app, db
+
+# Set up the logging format
+formatter = logging.Formatter(
+    '%(asctime)s %(levelname)s: %(message)s [in %(pathname)s:%(lineno)d]'
+)
+
+# Set up a rotating log handler to avoid the log file growing indefinitely
+log_handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
+
+# Set the log handler level to DEBUG (or any other level you wish)
+log_handler.setLevel(logging.DEBUG)
+
+# Apply the formatter to the log handler
+log_handler.setFormatter(formatter)
+
+# Add the log handler to the Flask app's logger
+app.logger.addHandler(log_handler)
+
+# Optionally, set the overall log level for the app's logger
+app.logger.setLevel(logging.DEBUG)
+
 if __name__ == "__main__":
-    from hangman_app import app
-    app.run(host="0.0.0.0", port=5000, debug=True)
+    with app.app_context():
+        db.create_all()
+    app.run(host="0.0.0.0", port=5013, debug=False)

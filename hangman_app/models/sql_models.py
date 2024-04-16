@@ -31,9 +31,11 @@ class GameStats(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     game_result = db.Column(db.Boolean, nullable=False)
     total_letters_guessed = db.Column(db.Integer, nullable=False)
-    game_played_timestamp = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    game_start = db.Column(db.DateTime, nullable=False, default=datetime.now)
+    game_end = db.Column(db.DateTime, nullable=False, default=datetime.now)
 
     def __repr__(self):
         return f"GameStats(user_id={self.user_id}, game_result={self.game_result}, " \
                f"total_letters_guessed={self.total_letters_guessed}, " \
-               f"game_played_timestamp={self.game_played_timestamp})"
+               f"game_started={self.game_start}, " \
+               f"game_ended={self.game_end})"

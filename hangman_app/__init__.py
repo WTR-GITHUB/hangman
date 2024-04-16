@@ -1,4 +1,4 @@
-from flask import Flask, session
+from flask import Flask, current_app, session
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -66,14 +66,14 @@ app.register_blueprint(bp_guests)
 app.register_blueprint(bp_members)
 app.register_blueprint(bp_game)
 
+
 from hangman_app.models.sql_models import User
 
 
 @login_manager.user_loader
 def load_user(user_id):
-    db.create_all()
+    current_app.logger.debug(f"Current user ID: {user_id}")
     return User.query.get(int(user_id))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
