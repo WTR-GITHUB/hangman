@@ -50,13 +50,28 @@ def check_letter():
 
     if not is_correct:
         session['wrong_guesses'] = session.get('wrong_guesses', 0) + 1
-        if session['wrong_guesses'] == 6:
-            return jsonify({"revealed_word": revealed_word, "is_correct": False, "game_over": True})
-    
+
+    # Generate image path based on the number of wrong guesses
+    img_path = f"game_image/pngegg{session['wrong_guesses']}.png"
+
+    if session['wrong_guesses'] >= 6:
+        # If the game is over (e.g., 6 wrong guesses), send the game over response
+        return jsonify({
+            "revealed_word": revealed_word,
+            "is_correct": False,
+            "game_over": True,
+            "img_path": img_path
+        })
+
     all_letters_guessed = word.check_all_guessed_letters(USED_LETTERS)
 
-
-    return jsonify({"revealed_word": revealed_word, "is_correct": is_correct, "game_over": False, 'all_letters_guessed': all_letters_guessed })
+    return jsonify({
+        "revealed_word": revealed_word,
+        "is_correct": is_correct,
+        "game_over": False,
+        "img_path": img_path,
+        'all_letters_guessed': all_letters_guessed
+    })
 
 
 @bp_game.route("/game/check_word", methods=["POST"])

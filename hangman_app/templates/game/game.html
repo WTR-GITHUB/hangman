@@ -8,7 +8,6 @@
     let usedLetters = [];
     let gameInProgress = false;
 
-
     function showMessage(message, type = "info", persistent = false) {
         const messageArea = document.getElementById('messageArea');
         messageArea.className = `alert alert-${type}`;
@@ -26,7 +25,7 @@
     function startGame() {
         timer = 0;
         document.getElementById('countup').innerText = '0s';  // Reset the timer display
-
+        document.getElementById('hangman-image').src = "/static/game_image/pngegg0.png";
         stopCountup();  // Stop the countup if it's running
 
         // Reset used letters, text input, and revealed word
@@ -113,6 +112,7 @@
 
             if (!data.is_correct) {
                 showMessage(`The letter '${letter}' is not in the word.`, "danger");
+                document.getElementById('hangman-image').src = "/static/" + data.img_path;
             } else {
                 showMessage(`The letter '${letter}' is in the word.`, "success");
             }
@@ -310,6 +310,7 @@ function gameOver() {
     };
 }
 
+
 </script>
 
 
@@ -372,7 +373,7 @@ function gameOver() {
     <div class="col-md-6">
         <!-- Image with Adjustable Size and Centered Position -->
         <div class="d-flex justify-content-center mt-3">
-            <img src="/static/game_image/pngegg.png" class="img-fluid" alt="Game Image">
+            <img id="hangman-image" src="/static/game_image/pngegg0.png" alt="Hangman Image" />
         </div>
     </div>
 </div>
