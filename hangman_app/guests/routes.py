@@ -1,7 +1,7 @@
 from sqlalchemy.exc import IntegrityError
 import traceback
 from hangman_app import db, bcrypt
-from flask import redirect, render_template, flash, request, url_for
+from flask import current_app, redirect, render_template, flash, request, url_for
 from flask_login import current_user, login_user
 from hangman_app.models.sql_models import User
 from hangman_app.forms.users_forms import SigninForm, LoginForm
@@ -19,7 +19,6 @@ def signin_page():
     form = SigninForm()
     
     if form.validate_on_submit():
-        # Check if passwords match
         if form.password.data != form.confirmed_password.data:
             flash("Passwords do not match. Please try again.", "danger")
             return render_template("guests/signin.html", title="Sign in", form=form)
@@ -34,9 +33,11 @@ def signin_page():
             db.session.add(user)
             db.session.commit()
             flash("You have successfully registered! You can login", "success")
-            return redirect(url_for("guests.index"))
+            return redirect(url_for("guests.login_page"))
         except IntegrityError as e:
             db.session.rollback()
+            current_app.logger.debug(f"Integruty error: {e}")
+            print(e)
             if 'e-mail' in str(e):
                 flash("Email already exists. Please use a different email.", "danger")
             elif 'name' in str(e):

@@ -50,12 +50,8 @@ def check_letter():
 
     if not is_correct:
         session['wrong_guesses'] = session.get('wrong_guesses', 0) + 1
-
-    # Generate image path based on the number of wrong guesses
     img_path = f"game_image/pngegg{session['wrong_guesses']}.png"
-
     if session['wrong_guesses'] >= 6:
-        # If the game is over (e.g., 6 wrong guesses), send the game over response
         return jsonify({
             "revealed_word": revealed_word,
             "is_correct": False,
