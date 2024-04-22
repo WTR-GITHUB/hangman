@@ -1,3 +1,4 @@
+from flask import current_app
 from flask_wtf import FlaskForm
 from wtforms import SubmitField, BooleanField, StringField, PasswordField
 from wtforms.validators import DataRequired, ValidationError, EqualTo
@@ -16,11 +17,13 @@ class SigninForm(FlaskForm):
     def validate_user_name(self, user_name):
         user = User.query.filter_by(user_name=user_name.data).first()
         if user:
+            current_app.logger.debug(f"This user already exists: {user}")
             raise ValidationError("This name has already taken pick another one.")
 
     def validate_email(self, email):
         user = User.query.filter_by(email=email.data).first()
         if user:
+            current_app.logger.debug(f"This email already exists: {user}")
             raise ValidationError("This email has already taken pick another one.")
 
 

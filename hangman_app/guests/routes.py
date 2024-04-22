@@ -14,37 +14,28 @@ from hangman_app.forms.users_modify import (
 @bp_guests.route("/signin", methods=["GET", "POST"])
 def signin_page():
     if current_user.is_authenticated:
-        return redirect(url_for("guests.index"))
+        return redirect(url_for("members.index"))
     
     form = SigninForm()
-    
     if form.validate_on_submit():
-        if form.password.data != form.confirmed_password.data:
-            flash("Passwords do not match. Please try again.", "danger")
-            return render_template("guests/signin.html", title="Sign in", form=form)
-
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode("utf-8")
         user = User(
             user_name=form.user_name.data,
             email=form.email.data,
-            password=hashed_password,
+            password=hashed_password
         )
+        db.session.add(user)
         try:
-            db.session.add(user)
             db.session.commit()
-            flash("You have successfully registered! You can login", "success")
+            flash("You have successfully registered! You can now login.", "success")
             return redirect(url_for("guests.login_page"))
-        except IntegrityError as e:
+        except Exception as e:
             db.session.rollback()
-            current_app.logger.debug(f"Integruty error: {e}")
-            print(e)
-            if 'e-mail' in str(e):
-                flash("Email already exists. Please use a different email.", "danger")
-            elif 'name' in str(e):
-                flash("Username already exists. Please choose a different username.", "danger")
-            else:
-                flash("An error occurred. Please try again.", "danger")
-            return render_template("guests/signin.html", title="Sign in", form=form)
+            flash("Registration failed. Please try again.", "danger")
+    else:
+        for fieldName, errorMessages in form.errors.items():
+            for err in errorMessages:
+                current_app.logger.debug(f"Error in {fieldName}: {err}")
 
     return render_template("guests/signin.html", title="Sign in", form=form)
 
