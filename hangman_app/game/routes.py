@@ -1,13 +1,11 @@
-from datetime import datetime
-from flask import render_template, request, jsonify, session
+from flask import current_app, render_template, request, jsonify
 from flask_login import current_user, login_required
 from hangman_app.game import bp_game
 from hangman_app import mongodb, db
-from hangman_app.models.game_models import Word
+from hangman_app.models.game_models import HangmanGame
 from hangman_app.models.sql_models import GameStats
 
-word = Word()
-USED_LETTERS = []
+hangman_game = HangmanGame()
 
 
 @bp_game.route("/game")
@@ -26,17 +24,12 @@ def word_setup():
 
 @bp_game.route("/game/start", methods=["POST"])
 def start_game():
-    global USED_LETTERS
-    USED_LETTERS = []
-    session["wrong_guesses"] = 0
-    revealed_word = word.display_word(USED_LETTERS)
-    session['game_start_time'] = datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
+    revealed_word = hangman_game.start_game()
     return jsonify({"revealed_word": revealed_word})
 
 
 @bp_game.route("/game/check_letter", methods=["POST"])
 def check_letter():
-    global USED_LETTERS
     data = request.json
     if data is None:
         return jsonify({"error": "No JSON data received"}), 400
@@ -45,34 +38,11 @@ def check_letter():
     if letter is None:
         return jsonify({"error": "No letter provided"}), 400
 
-    is_correct = word.process_letter_guess(letter, USED_LETTERS)
-    revealed_word = word.display_word(USED_LETTERS)
-
-    if not is_correct:
-        session['wrong_guesses'] = session.get('wrong_guesses', 0) + 1
-    img_path = f"game_image/pngegg{session['wrong_guesses']}.png"
-    if session['wrong_guesses'] >= 6:
-        return jsonify({
-            "revealed_word": revealed_word,
-            "is_correct": False,
-            "game_over": True,
-            "img_path": img_path
-        })
-
-    all_letters_guessed = word.check_all_guessed_letters(USED_LETTERS)
-
-    return jsonify({
-        "revealed_word": revealed_word,
-        "is_correct": is_correct,
-        "game_over": False,
-        "img_path": img_path,
-        'all_letters_guessed': all_letters_guessed
-    })
+    return hangman_game.check_letter(letter)
 
 
 @bp_game.route("/game/check_word", methods=["POST"])
 def check_word():
-    global USED_LETTERS
     data = request.json
     if data is None:
         return jsonify({"error": "No JSON data received"}), 400
@@ -81,48 +51,28 @@ def check_word():
     if guessed_word is None:
         return jsonify({"error": "No word provided"}), 400
 
-    if guessed_word == word.word:
-        return jsonify({"is_correct": True})
-    else:
-        return jsonify({"is_correct": False})
+    return hangman_game.check_word(guessed_word)
+
 
 @bp_game.route("/game/end_game", methods=["POST"])
 @login_required
 def end_game():
-    data = request.json
-    game_result = data.get("game_result")
-    print(game_result)
-    if not data:
-        return jsonify({"error": "No JSON data received"}), 400
-    total_letters_guessed = data.get("total_letters_guessed")
-    start_time = session.get('game_start_time')
-    if not start_time:
-        return jsonify({"error": "Game start time not found in session"}), 400
-    if game_result is None or total_letters_guessed is None:
-        return jsonify({"error": "Missing game result or total letters guessed"}), 400
+    current_user_id = current_user.get_id()
+    user = hangman_game.mongo_collection.find_one({"user_id": current_user_id})
+    if not user:
+        current_app.logger.debug(f"Current user ID: {current_user_id} not found")
+        return jsonify({"error": "Unauthorized user"}), 403
 
-    user_id = current_user.id
-    start_time = session.get("game_start_time")
-    end_time = datetime.now()
-
-    if not start_time:
-        return jsonify({"error": "Game start time not found in session"}), 400
-
-
-    if isinstance(start_time, str):
-        start_time = datetime.strptime(start_time, '%Y-%m-%d %H:%M:%S.%f')
-    print(user_id)
-    print(game_result)
-    print(total_letters_guessed)
-    print(start_time)
-    print(end_time)
+    current_app.logger.debug(
+        f"{current_user_id},{user.get('total_guesses')},{user.get('game_started')},{user.get('game_ended')},{user.get('game_win')}"
+    )
 
     game_stats = GameStats(
-        user_id=user_id,
-        game_result=game_result,
-        total_letters_guessed=total_letters_guessed,
-        game_start=start_time,
-        game_end=end_time
+        user_id=current_user_id,
+        game_result=user.get("game_win"),
+        total_letters_guessed=user.get("total_guesses"),
+        game_start=user.get("game_started"),
+        game_end=user.get("game_ended"),
     )
 
     db.session.add(game_stats)
