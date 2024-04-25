@@ -102,6 +102,17 @@
                         stopCountup();
                         document.getElementById('countup').innerText = 'Game lost!';
                     }
+                    // Check if guess_word is false
+                    if (data.guess_word === false) {
+                        document.getElementById('revealedWord').innerText = data.revealed_word;
+                        stopCountup();  // Stop the countup timer
+                        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+                        alphabetButtons.forEach(button => {
+                            button.disabled = true;  // Disable all letter buttons
+                        });
+                        showMessage("You must guess the word!", "info");  // Update UI to inform the player
+                        document.getElementById('countup').innerText = 'You must guess the word!';
+                    }
                 } else {
                     showMessage(`The letter '${letter}' is in the word.`, "success");
                     document.getElementById('revealedWord').innerText = data.revealed_word;
@@ -113,6 +124,18 @@
                         document.getElementById('countup').innerText = 'Game won!';
                         document.getElementById('revealedWord').innerText = data.revealed_word;
                         gameWin();
+                    }
+
+                    // Check if guess_word is false
+                    if (data.guess_word === false) {
+                        document.getElementById('revealedWord').innerText = data.revealed_word;
+                        stopCountup();  // Stop the countup timer
+                        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+                        alphabetButtons.forEach(button => {
+                            button.disabled = true;  // Disable all letter buttons
+                        });
+                        showMessage("You must guess the word!", "info");  // Update UI to inform the player
+                        document.getElementById('countup').innerText = 'You must guess the word!';
                     }
                 }
 
@@ -139,7 +162,7 @@
         })
             .then(response => response.json())
             .then(data => {
-                if (data.is_correct) {
+                if (data.game_win) {
                     showMessage(`Congratulations! You guessed the word: ${guess}`, "success", true);
                     document.getElementById('countup').innerText = 'Game won!';
                     gameWin();

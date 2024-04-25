@@ -1,4 +1,4 @@
-from flask import Flask, current_app, session
+from flask import Flask, current_app
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -11,13 +11,7 @@ from hangman_app.credentials import (
     POSTGRES_HOST,
     POSTGRES_PORT,
     POSTGRES_USER,
-    MONGO_HOST,
-    MONGO_PORT,
-    MONGO_DB_NAME,
-    MONGO_COLLECTION_NAME,
 )
-from hangman_app.models.mongo_models import MongoDB
-from pymongo.errors import ConnectionFailure, PyMongoError, ConfigurationError
 
 app = Flask(__name__)
 
@@ -35,20 +29,6 @@ app.config["MAIL_PASSWORD"] = MAIL_PASSWORD
 
 db = SQLAlchemy(app)
 
-try:
-    mongodb = MongoDB(
-        host=MONGO_HOST,
-        port=int(MONGO_PORT),
-        db_name=MONGO_DB_NAME,
-        collection_name=MONGO_COLLECTION_NAME,
-    )
-except ConnectionFailure as e:
-    print("Connection failure:", str(e))
-except ConfigurationError as e:
-    print("Configuration failure:", str(e))
-except PyMongoError as e:
-    print("General failure:", str(e))
-
 
 mail = Mail(app)
 
@@ -61,10 +41,12 @@ login_manager.login_message_category = "info"
 from hangman_app.guests import bp_guests
 from hangman_app.members import bp_members
 from hangman_app.game import bp_game
+from hangman_app.errors import bp_error
 
 app.register_blueprint(bp_guests)
 app.register_blueprint(bp_members)
 app.register_blueprint(bp_game)
+app.register_blueprint(bp_error)
 
 
 from hangman_app.models.sql_models import User
@@ -74,6 +56,7 @@ from hangman_app.models.sql_models import User
 def load_user(user_id):
     current_app.logger.debug(f"Current user ID: {user_id}")
     return User.query.get(int(user_id))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
