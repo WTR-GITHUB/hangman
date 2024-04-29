@@ -17,6 +17,7 @@ MarkupSafe==2.1.5
 pillow==10.3.0
 psycopg2-binary==2.9.9
 pymongo==4.6.3
+python-dotenv==1.0.1
 SQLAlchemy==2.0.29
 tk==0.1.0
 typing_extensions==4.10.0

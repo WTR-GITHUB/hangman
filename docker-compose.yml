@@ -1,0 +1,24 @@
+version: '3.9'
+
+services:
+  flask_app:
+    build: .
+    ports:
+      - "5011:5011"
+    depends_on:
+      - postgres
+      - mongo
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: MyHangman
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"

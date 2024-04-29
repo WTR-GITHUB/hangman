@@ -5,31 +5,15 @@ from hangman_app.game import bp_game
 from hangman_app import db
 from hangman_app.game_engine import HangmanGame
 from hangman_app.models.sql_models import GameStats
-from hangman_app.models.mongo_models import MongoDB, MongoStats
+from hangman_app.models.mongo_models import MongoStats, mongo_db
 from pymongo.errors import ConnectionFailure, PyMongoError, ConfigurationError
 from hangman_app.credentials import (
     MONGO_HOST,
     MONGO_PORT,
-    MONGO_DB_NAME,
-    MONGO_COLLECTION_NAME,
     MONGO_GAME_DB_NAME,
     MONGO_GAME_COLLECTION_NAME,
 )
 
-
-try:
-    mongo_db = MongoDB(
-        host=MONGO_HOST,
-        port=int(MONGO_PORT),
-        db_name=MONGO_DB_NAME,
-        collection_name=MONGO_COLLECTION_NAME,
-    )
-except ConnectionFailure as e:
-    print("Connection failure:", str(e))
-except ConfigurationError as e:
-    print("Configuration failure:", str(e))
-except PyMongoError as e:
-    print("General failure:", str(e))
 
 
 try:
@@ -53,15 +37,6 @@ hangman_game = HangmanGame()
 @bp_game.route("/game")
 def game():
     return render_template("game/game.html")
-
-
-# @bp_game.route("/game/word")
-# def word_setup():
-#     success = mongodb.create_word_library()
-#     if success:
-#         return "Word library successfully created and inserted into the database."
-#     else:
-#         return "Error occurred while creating word library."
 
 
 @bp_game.route("/game/start", methods=["POST"])

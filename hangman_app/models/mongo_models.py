@@ -1,8 +1,14 @@
 from datetime import datetime
-import os
 from typing import Dict, Optional
 from flask import current_app
 from pymongo import MongoClient
+from pymongo.errors import ConnectionFailure, PyMongoError, ConfigurationError
+from hangman_app.credentials import (
+    MONGO_HOST,
+    MONGO_PORT,
+    MONGO_DB_NAME,
+    MONGO_COLLECTION_NAME,
+)
 
 
 class MongoDB:
@@ -20,20 +26,20 @@ class MongoDB:
             for word in words_list:
                 document = {"word": word}
                 result = self.collection.insert_one(document)
-                print(f"Inserted document with ID: {result.inserted_id}")
-                print(f"This word was inserted into the database: {document}")
+            current_app.logger.debug("Words inserted into the database successfully.")
             return True
         except FileNotFoundError:
-            print("Error: File 'words.txt' not found.")
+            current_app.logger.debug("Error: File 'words.txt' not found.")
             return False
         except Exception as error:
-            print(f"Error: {error}")
+            current_app.logger.debug(f"Error while inserting words into the database: {str(error)}")
             return False
-
+        
     def all_words(self) -> list[str]:
         all_words = self.collection.find({}, {"word": 1})
         word_list = [doc["word"] for doc in all_words]
         return word_list
+
 
 
 class MongoStats:
@@ -88,3 +94,17 @@ class MongoStats:
         self.collection.update_one(
             {"user_id": current_user_id}, {"$set": {"game_ended": datetime.now()}}
         )
+
+try:
+    mongo_db = MongoDB(
+        host=MONGO_HOST,
+        port=int(MONGO_PORT),
+        db_name=MONGO_DB_NAME,
+        collection_name=MONGO_COLLECTION_NAME,
+    )
+except ConnectionFailure as e:
+    print("Connection failure:", str(e))
+except ConfigurationError as e:
+    print("Configuration failure:", str(e))
+except PyMongoError as e:
+    print("General failure:", str(e))
