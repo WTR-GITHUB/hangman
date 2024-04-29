@@ -51,12 +51,12 @@ class TestHangmanGame(unittest.TestCase):
 
     def test_check_total_guesses_true(self):
         total_guesses = 11
-        result, _ = self.game.check_total_guesses(total_guesses)
+        result = self.game.check_total_guesses(total_guesses)
         self.assertTrue(result)
 
     def test_check_total_guesses_false(self):
         total_guesses = 9
-        result, _ = self.game.check_total_guesses(total_guesses)
+        result = self.game.check_total_guesses(total_guesses)
         self.assertFalse(result)
 
     def test_check_is_word_already_guessed_true(self):
