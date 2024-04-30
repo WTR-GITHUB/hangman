@@ -2,51 +2,43 @@
 
 This is my final project for the Python beginner course. The task description is provided in [Task_description.md](https://github.com/WTR-GITHUB/hangman/blob/main/Task_description.md).
 
-The code was developed and tested in a Linux Ubuntu environment. Below are the recommended installation steps.
+The code was developed and tested in a Linux Ubuntu environment. You must to have [docker](https://docs.docker.com/engine/install/ubuntu/) installed.
 
-1. Create a folder to download this project:
-    ```
-    mkdir <folder_name>
-    ```
+Below are the recommended installation steps:
 
-2. Navigate to the newly created folder:
+1. Navigate to the folder where you want to download hangman game folder with the content:
     ```
     cd <folder_name>
     ```
 
-3. Set up a virtual environment:
-    ```
-    python -m venv <venv folder name>
-    ```
-
-4. Activate the virtual environment in Linux:
-    ```
-    source <venv folder name>/bin/activate
-    ```
-
-5. Clone this GitHub repository:
+2. Clone this GitHub repository:
     ```
     git clone git@github.com:WTR-GITHUB/hangman.git
     ```
-
-6. Install all necessary requirements:
+    
+3. Navigate to the hangman folder:
     ```
-    pip install -r requirements.txt
+    cd hangman
+    ```  
+    
+4. Edit the docker-compose.yml file. Below is an example using the nano editor, but you can use others to fulfill your needs.
+    ```
+    nano docker-compose.yml
     ```
 
-7. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
+5. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
     ```yaml
     MAIL_USERNAME: ${MAIL_USERNAME}
     MAIL_PASSWORD: ${MAIL_PASSWORD}
     ```
-    All other settings can remain default or be modified according to user needs.
+    These settings are necessary in order for the password reset to work. As an option you can use gmail app password setup. All other settings can remain default or be modified according to user needs.
 
-8. Run Docker Compose with the command:
+6. Run Docker Compose with the command:
     ```
     docker-compose up --build --force-recreate --no-deps
     ```
 
-9. To stop, use Ctrl+C and the command:
+7. To stop, use Ctrl+C and the command:
     ```
     docker-compose down
     ```
