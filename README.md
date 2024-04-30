@@ -2,7 +2,9 @@
 
 This is my final project for the Python beginner course. The task description is provided in [Task_description.md](https://github.com/WTR-GITHUB/hangman/blob/main/Task_description.md).
 
-The code was developed and tested in a Linux Ubuntu environment. Below are the recommended installation steps.
+The code was developed and tested in a Linux Ubuntu environment. You must to have [docker](https://docs.docker.com/engine/install/ubuntu/) installed.
+
+Below are the recommended installation steps:
 
 1. Navigate to the folder where you want to download hangman game folder with the content:
     ```
@@ -18,40 +20,25 @@ The code was developed and tested in a Linux Ubuntu environment. Below are the r
     ```
     cd hangman
     ```  
-
-4. Set up a virtual environment:
-    ```
-    python3 -m venv <venv folder name>
-    ```
-
-5. Activate the virtual environment in Linux:
-    ```
-    source <venv folder name>/bin/activate
-    ```
-
-6. Install all necessary requirements:
-    ```
-    pip install -r requirements.txt
-    ```
     
-7. Edit docker-compose.yml file in the Nano text editor
+4. Edit the docker-compose.yml file. Below is an example using the nano editor, but you can use others to fulfill your needs.
     ```
     nano docker-compose.yml
     ```
 
-8. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
+5. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
     ```yaml
     MAIL_USERNAME: ${MAIL_USERNAME}
     MAIL_PASSWORD: ${MAIL_PASSWORD}
     ```
     All other settings can remain default or be modified according to user needs.
 
-9. Run Docker Compose with the command:
+6. Run Docker Compose with the command:
     ```
     docker-compose up --build --force-recreate --no-deps
     ```
 
-10. To stop, use Ctrl+C and the command:
+7. To stop, use Ctrl+C and the command:
     ```
     docker-compose down
     ```
