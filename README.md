@@ -31,7 +31,7 @@ Below are the recommended installation steps:
     MAIL_USERNAME: ${MAIL_USERNAME}
     MAIL_PASSWORD: ${MAIL_PASSWORD}
     ```
-    These settings are necessary in order for the password reset to work. All other settings can remain default or be modified according to user needs.
+    These settings are necessary in order for the password reset to work. As an option you can use gmail app password setup. All other settings can remain default or be modified according to user needs.
 
 6. Run Docker Compose with the command:
     ```
