@@ -21,7 +21,7 @@ The code was developed and tested in a Linux Ubuntu environment. Below are the r
 
 4. Set up a virtual environment:
     ```
-    python -m venv <venv folder name>
+    python3 -m venv <venv folder name>
     ```
 
 5. Activate the virtual environment in Linux:
