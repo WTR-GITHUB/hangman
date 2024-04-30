@@ -2,7 +2,7 @@ import time
 from hangman_app import db
 from hangman_app.models.mongo_models import mongo_db
 from flask import current_app
-from hangman_app.credentials import MONGO_DB_NAME
+from hangman_app.credentials_v2 import MONGO_DB_NAME
 
 
 
