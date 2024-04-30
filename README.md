@@ -35,9 +35,9 @@ The code was developed and tested in a Linux Ubuntu environment. Below are the r
     ```
     
 7. Edit docker-compose.yml file in the Nano text editor
-```
-nano docker-compose.yml
-```
+    ```
+    nano docker-compose.yml
+    ```
 
 8. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
     ```yaml
