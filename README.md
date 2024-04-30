@@ -1,14 +1,52 @@
-# hangman
-Final CodeAcademy task
+# Python Beginner Course Final Project
 
-``` bash
-docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -e POSTGRES_USER=yourusername -e POSTGRES_DB=yourdatabasename -p 5432:5432 -d postgres
-```
-To start app
-``` bash
-docker-compose up --build --force-recreate --no-deps
-```
-To stop pres Ctrl+C and comand
-``` bash
-docker-compose down
-```
+This is my final project for the Python beginner course. The task description is provided in [Task_description.md](https://github.com/WTR-GITHUB/hangman/blob/main/Task_description.md).
+
+The code was developed and tested in a Linux Ubuntu environment. Below are the recommended installation steps.
+
+1. Create a folder to download this project:
+    ```
+    mkdir <folder_name>
+    ```
+
+2. Navigate to the newly created folder:
+    ```
+    cd <folder_name>
+    ```
+
+3. Set up a virtual environment:
+    ```
+    # Example of creating a virtual environment with venv
+    ```
+
+4. Activate the virtual environment in Linux:
+    ```
+    # Activation of virtual environment in Linux
+    ```
+
+5. Clone this GitHub repository:
+    ```
+    # Provide instructions for cloning
+    ```
+
+6. Install all necessary requirements:
+    ```
+    pip install -r requirements.txt
+    ```
+
+7. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
+    ```yaml
+    MAIL_USERNAME: ${MAIL_USERNAME}
+    MAIL_PASSWORD: ${MAIL_PASSWORD}
+    ```
+    All other settings can remain default or be modified according to user needs.
+
+8. Run Docker Compose with the command:
+    ```
+    docker-compose up --build --force-recreate --no-deps
+    ```
+
+9. To stop, use Ctrl+C and the command:
+    ```
+    docker-compose down
+    ```
