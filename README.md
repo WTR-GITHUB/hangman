@@ -33,20 +33,25 @@ The code was developed and tested in a Linux Ubuntu environment. Below are the r
     ```
     pip install -r requirements.txt
     ```
+    
+7. Edit docker-compose.yml file in the Nano text editor
+```
+nano docker-compose.yml
+```
 
-7. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
+8. Make necessary configurations in the `docker-compose.yml` file. Essential settings:
     ```yaml
     MAIL_USERNAME: ${MAIL_USERNAME}
     MAIL_PASSWORD: ${MAIL_PASSWORD}
     ```
     All other settings can remain default or be modified according to user needs.
 
-8. Run Docker Compose with the command:
+9. Run Docker Compose with the command:
     ```
     docker-compose up --build --force-recreate --no-deps
     ```
 
-9. To stop, use Ctrl+C and the command:
+10. To stop, use Ctrl+C and the command:
     ```
     docker-compose down
     ```
