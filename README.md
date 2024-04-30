@@ -16,17 +16,17 @@ The code was developed and tested in a Linux Ubuntu environment. Below are the r
 
 3. Set up a virtual environment:
     ```
-    # Example of creating a virtual environment with venv
+    python -m venv <venv folder name>
     ```
 
 4. Activate the virtual environment in Linux:
     ```
-    # Activation of virtual environment in Linux
+    source <venv folder name>/bin/activate
     ```
 
 5. Clone this GitHub repository:
     ```
-    # Provide instructions for cloning
+    git clone git@github.com:WTR-GITHUB/hangman.git
     ```
 
 6. Install all necessary requirements:
