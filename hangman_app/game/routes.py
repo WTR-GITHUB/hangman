@@ -7,7 +7,7 @@ from hangman_app.game_engine import HangmanGame
 from hangman_app.models.sql_models import GameStats
 from hangman_app.models.mongo_models import MongoStats, mongo_db
 from pymongo.errors import ConnectionFailure, PyMongoError, ConfigurationError
-from hangman_app.credentials import (
+from hangman_app.credentials_v2 import (
     MONGO_HOST,
     MONGO_PORT,
     MONGO_GAME_DB_NAME,

@@ -3,7 +3,7 @@ from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_mail import Mail
-from hangman_app.credentials import (
+from hangman_app.credentials_v2 import (
     MAIL_PASSWORD,
     MAIL_USERNAME,
     POSTGRES_DB,

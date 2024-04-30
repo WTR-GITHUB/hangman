@@ -3,7 +3,7 @@ from typing import Dict, Optional
 from flask import current_app
 from pymongo import MongoClient
 from pymongo.errors import ConnectionFailure, PyMongoError, ConfigurationError
-from hangman_app.credentials import (
+from hangman_app.credentials_v2 import (
     MONGO_HOST,
     MONGO_PORT,
     MONGO_DB_NAME,
