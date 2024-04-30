@@ -1,0 +1,395 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<script>
+    let countupInterval;
+    let timer = 0;
+    let usedLetters = [];
+    let gameInProgress = false;
+
+    function showMessage(message, type = "info", persistent = false) {
+        const messageArea = document.getElementById('messageArea');
+        messageArea.className = `alert alert-${type}`;
+        messageArea.innerText = message;
+        messageArea.style.display = 'block';
+
+        if (!persistent) {
+            // Automatically hide the message after 3 seconds
+            setTimeout(() => {
+                messageArea.style.display = 'none';
+            }, 3000);
+        }
+    }
+
+    function startGame() {
+        timer = 0;
+        document.getElementById('countup').innerText = '0s';  // Reset the timer display
+        document.getElementById('hangman-image').src = "/static/game_image/pngegg0.png";
+        stopCountup();  // Stop the countup if it's running
+        usedLetters = [];
+        document.getElementById('usedLetters').innerText = "Used Letters: ";
+        document.getElementById('textInput').value = '';  // Clear text input
+        document.getElementById('revealedWord').innerText = '';  // Clear revealed word
+
+        // Enable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+        alphabetButtons.forEach(button => {
+            button.disabled = false;
+            button.style.backgroundColor = '';
+        });
+        document.getElementById('textInput').disabled = false;
+
+        // Disable the OK button
+        document.querySelector('form button[type="submit"]').disabled = false;
+        console.log("startGame function called");
+        fetch('/game/start', {
+            method: 'POST'
+        })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('revealedWord').innerText = data.revealed_word;
+                document.getElementById('alphabetButtonsContainer').style.display = 'block';
+                gameInProgress = true; // Set game in progress
+                startCountup();
+                showMessage("Game started!", "success");
+            })
+            .catch((error) => {
+                console.error('Error:', error);
+                showMessage("Error starting the game.", "danger");
+            });
+    }
+
+    function startCountup() {
+        countupInterval = setInterval(() => {
+            timer++;
+            document.getElementById('countup').innerText = timer + 's';
+        }, 1000);
+        console.log("startCountup function called");
+    }
+
+    function stopCountup() {
+        clearInterval(countupInterval);
+        console.log("stopCountup function called");
+    }
+
+    function selectLetter(letter) {
+        if (!gameInProgress) return; // If game is over, do nothing
+
+        // Disable button
+        const button = document.getElementById(letter);
+        button.disabled = true;
+        button.style.backgroundColor = 'grey';
+
+        // Make AJAX request to check the letter
+        fetch('/game/check_letter', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'letter': letter }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                updateUsedLetters(data.used_letters);
+                if (!data.is_correct) {
+                    showMessage(`The letter '${letter}' is not in the word.`, "danger");
+                    document.getElementById('hangman-image').src = "/static/" + data.img_path;
+                    // Increment mistakes only if the letter is incorrect
+                    if (data.game_over) {
+                        gameOver();
+                        showMessage("Game lost", "danger");
+                        stopCountup();
+                        document.getElementById('countup').innerText = 'Game lost!';
+                    }
+                    // Check if guess_word is false
+                    if (data.guess_word === false) {
+                        document.getElementById('revealedWord').innerText = data.revealed_word;
+                        stopCountup();  // Stop the countup timer
+                        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+                        alphabetButtons.forEach(button => {
+                            button.disabled = true;  // Disable all letter buttons
+                        });
+                        showMessage("You must guess the word!", "info");  // Update UI to inform the player
+                        document.getElementById('countup').innerText = 'You must guess the word!';
+                    }
+                } else {
+                    showMessage(`The letter '${letter}' is in the word.`, "success");
+                    document.getElementById('revealedWord').innerText = data.revealed_word;
+
+                    // Check if the game is won
+                    if (data.game_win) {
+                        showMessage("Congratulations! You've guessed the entire word.", "success");
+                        stopCountup();
+                        document.getElementById('countup').innerText = 'Game won!';
+                        document.getElementById('revealedWord').innerText = data.revealed_word;
+                        gameWin();
+                    }
+
+                    // Check if guess_word is false
+                    if (data.guess_word === false) {
+                        document.getElementById('revealedWord').innerText = data.revealed_word;
+                        stopCountup();  // Stop the countup timer
+                        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+                        alphabetButtons.forEach(button => {
+                            button.disabled = true;  // Disable all letter buttons
+                        });
+                        showMessage("You must guess the word!", "info");  // Update UI to inform the player
+                        document.getElementById('countup').innerText = 'You must guess the word!';
+                    }
+                }
+
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage("Error checking the letter.", "danger");
+            });
+    }
+
+    function handleInput(event) {
+        event.preventDefault();  // Prevent default form submission
+
+        if (!gameInProgress) return; // If game is over, do nothing
+
+        const guess = document.getElementById('textInput').value;
+
+        fetch('/game/check_word', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ 'guess': guess }),
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.game_win) {
+                    showMessage(`Congratulations! You guessed the word: ${guess}`, "success", true);
+                    document.getElementById('countup').innerText = 'Game won!';
+                    gameWin();
+                } else {
+                    showMessage(`Sorry, the word '${guess}' is incorrect. Try again.`, "danger");
+                    document.getElementById('countup').innerText = 'Game lost!';
+                    gameOver();
+                }
+
+                // Stop the countdown timer
+                stopCountup();
+
+                // Reset text input and revealed word display
+                document.getElementById('textInput').value = '';
+                document.getElementById('revealedWord').innerText = '';
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showMessage("Error checking the word.", "danger");
+            });
+    }
+
+    function exitGame() {
+        fetch('/member', { method: 'GET' })
+            .then(response => {
+                console.log('Exit game request successful');
+                // Redirect to the members page after successfully exiting the game
+                window.location.href = '/member';
+            })
+            .catch(error => {
+                console.error('Error exiting game:', error);
+            });
+    }
+
+    function endGame() {
+        gameInProgress = true; // Set game over
+
+        // Disable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+        alphabetButtons.forEach(button => {
+            button.disabled = true;
+        });
+        console.log("endGame function called");
+    }
+
+
+    function gameWin() {
+        // Set game in progress to false
+        gameInProgress = false;
+
+        // Disable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+        alphabetButtons.forEach(button => {
+            button.disabled = true;
+        });
+
+        // Disable text input
+        document.getElementById('textInput').disabled = true;
+
+        // Disable the OK button
+        document.querySelector('form button[type="submit"]').disabled = true;
+
+        // Prepare JSON data
+        const jsonData = JSON.stringify({ 'game_result': true, 'total_letters_guessed': usedLetters.length });
+
+        // Log game win information and JSON data
+        console.log('Game won! Total letters guessed:', usedLetters.length);
+        console.log('JSON data to be sent:', jsonData);
+
+        // Send game result to server
+        fetch('/game/end_game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: jsonData,
+        })
+            .then(response => response.json())  // Process the response to JSON
+            .then(data => console.log('Server response:', data))  // Log the server response
+            .catch(error => console.error('An error occurred:', error));  // Log any errors
+
+        return {
+            result: 'win',
+            totalLettersGuessed: usedLetters.length
+        };
+    }
+
+    function gameOver() {
+        gameInProgress = false; // Set game over
+
+        // Disable all letter buttons
+        const alphabetButtons = document.querySelectorAll('#alphabetButtonsContainer button');
+        alphabetButtons.forEach(button => {
+            button.disabled = true;
+        });
+
+        // Disable text input
+        document.getElementById('textInput').disabled = true;
+
+        // Disable the OK button
+        document.querySelector('form button[type="submit"]').disabled = true;
+
+        // Prepare JSON data
+        const jsonData = JSON.stringify({ 'game_result': false, 'total_letters_guessed': usedLetters.length });
+
+        // Log game over information and JSON data
+        console.log('Game over! Total letters guessed:', usedLetters.length);
+        console.log('JSON data to be sent:', jsonData);
+
+        // Send game result to server
+        fetch('/game/end_game', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: jsonData,
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Server responded with status ${response.status}`);
+                }
+                return response.json();  // Correctly parse the JSON response
+            })
+            .then(data => console.log('Server response:', data))  // Handle the data from the resolved promise
+            .catch(error => console.error('An error occurred:', error));  // Log any errors
+
+        console.log("gameOver function called");
+
+        return {
+            result: 'over',
+            totalLettersGuessed: usedLetters.length
+        };
+    }
+    function updateUsedLetters(usedLetters) {
+        usedLettersContainer = document.getElementById('usedLetters');
+        usedLettersContainer.innerText = "Used Letters: " + usedLetters.join(', ');
+    }
+
+</script>
+
+
+
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-md-6">
+        <!-- First Row: Buttons -->
+        <div class="row mb-3">
+            <!-- Button Group for Horizontal Alignment to the Left -->
+            <div class="col">
+                <div class="d-flex justify-content-center">
+                    <!-- Start Game Button -->
+                    <button class="btn btn-dark mr-2" type="button" onclick="startGame()">Start Game</button>
+                    <!-- Exit Game Button -->
+                    <button class="btn btn-dark" type="button" onclick="exitGame()">Exit Game</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Second Row: Time Countup -->
+        <div class="row mb-3">
+            <div class="col d-flex justify-content-center">
+                <div id="countup" style="font-size: 42px;">0s</div>
+            </div>
+        </div>
+
+        <!-- Third Row: Used Letters -->
+        <div class="row mb-3">
+            <div class="col">
+                <div id="usedLetters" class="text-center">
+                    Used Letters:
+                    <span id="usedLettersSpan"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fourth Row: Revealed Word -->
+        <div class="row mb-3">
+            <div class="col d-flex justify-content-center align-items-center">
+                <div id="revealedWord" style="font-size: 42px;"></div>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col d-flex justify-content-center align-items-center">
+                <form onsubmit="handleInput(event)" class="w-100">
+                    <!-- Add the form element and onsubmit handler, and set width to 100% -->
+                    <div class="d-flex flex-column align-items-center"> <!-- Use flexbox to align items vertically -->
+                        <div class="mb-2 w-100"> <!-- Set the width to 100% for the input -->
+                            <input type="text" id="textInput" class="form-control" placeholder="Guess the word">
+                        </div>
+                        <div class="mb-2"> <!-- Separate button in a new row -->
+                            <button class="btn btn-dark" type="submit">Ok</button> <!-- Use 'submit' type here -->
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- Right Column -->
+    <div class="col-md-6">
+        <!-- Image with Adjustable Size and Centered Position -->
+        <div class="d-flex justify-content-center mt-3">
+            <img id="hangman-image" src="/static/game_image/pngegg0.png" alt="Hangman Image" />
+        </div>
+    </div>
+</div>
+
+<!-- Message Row -->
+<div class="row mb-3" style="height: 50px;">
+    <div class="col">
+        <div id="messageArea" class="alert" role="alert" style="display: none;">
+        </div>
+    </div>
+</div>
+
+<!-- Single Column for Letter Buttons -->
+<div class="row mt-4">
+    <div class="col d-flex justify-content-center">
+        <div id="alphabetButtonsContainer" class="d-flex flex-wrap justify-content-center">
+            {% for letter in 'ABCDEFGHIJKLMNOPQRSTUVWXYZ' %}
+            <button id="{{ letter }}" class="btn btn-secondary mx-2 mb-2" type="button"
+                onclick="selectLetter('{{ letter }}')">{{ letter }}</button>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+{% endblock %}

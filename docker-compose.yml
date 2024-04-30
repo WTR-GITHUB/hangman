@@ -1,0 +1,38 @@
+version: '3.9'
+
+services:
+  flask_app:
+    build: .
+    ports:
+      - "5011:5011"
+    depends_on:
+      - postgres
+      - mongo
+    environment:
+      MAIL_USERNAME: ${MAIL_USERNAME}
+      MAIL_PASSWORD: ${MAIL_PASSWORD}
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "MyHangman"
+      POSTGRES_DB: "postgres"
+      POSTGRES_HOST: "postgres"
+      POSTGRES_PORT: "5432"
+      MONGO_HOST: "mongo"
+      MONGO_PORT: 27017
+      MONGO_DB_NAME: "hangman"
+      MONGO_COLLECTION_NAME: "words"
+      MONGO_GAME_DB_NAME: "hangman_stats"
+      MONGO_GAME_COLLECTION_NAME: "game_status"
+
+  postgres:
+    image: postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: MyHangman
+      POSTGRES_DB: postgres
+    ports:
+      - "5432:5432"
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"

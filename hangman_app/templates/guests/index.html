@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<style>
+    .bg-image {
+        background-image: url('/static/page_image/pngegg.png');
+        background-position: center calc(5cm + 0px);
+        background-repeat: no-repeat;
+        background-size: contain;
+        background-attachment: fixed;
+    }
+
+    .game-title {
+        font-size: 72pt;
+        text-align: center;
+        margin-top: 0cm; /* Adjust this value to position it 3 cm from the top */
+    }
+</style>
+
+<body class="bg-image">
+
+<h1 class="game-title">HANGMAN GAME</h1>
+
+{% endblock %}
